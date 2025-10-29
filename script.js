@@ -60,7 +60,8 @@ function getFloorByNumber(number) {
     if(num >= 1 && num <= 200) return 1;   // Администрация и IT 1 этаж
     if(num >= 201 && num <= 300) return 2; // IT 2 этаж
     if(num >= 301 && num <= 400) return 3; // Научные лаборатории 3 этаж
-    if(num >= 401 && num <= 500) return 4; // Художественные студии 4 этаж
+    if(num >= 401 && num <= 405) return 4; // Художественные студии 4 этаж
+    if(num >= 405 && ) return 'Во дворце школьников всего 405 этажей';
 
     return null;
 }
@@ -185,3 +186,4 @@ sendBtn.addEventListener('click', () => {
 clearBtn.addEventListener('click', () => {
     historyEl.innerHTML = '';
 });
+
