@@ -20,8 +20,8 @@ function matchAny(str, keywords){
 }
 
 /* ====== База данных кабинетов ====== */
+/* ====== Исправленная база кабинетов ====== */
 const classrooms = {
-    // IT-направление
     'it': [
         { number: '101', name: 'Компьютерный класс', floor: 1, description: 'Основы программирования и компьютерной грамотности' },
         { number: '102', name: 'Лаборатория робототехники', floor: 1, description: 'Сборка и программирование роботов Lego Mindstorms' },
@@ -29,25 +29,19 @@ const classrooms = {
         { number: '201', name: 'Кибербезопасность', floor: 2, description: 'Основы информационной безопасности' },
         { number: '202', name: 'Веб-разработка', floor: 2, description: 'Создание сайтов и веб-приложений' }
     ],
-    
-    // Научно-биологическое направление
     'science': [
         { number: '301', name: 'Биологическая лаборатория', floor: 3, description: 'Микроскопы и исследовательское оборудование' },
         { number: '302', name: 'Химическая лаборатория', floor: 3, description: 'Проведение химических экспериментов' },
         { number: '303', name: 'Кабинет экологии', floor: 3, description: 'Изучение окружающей среды' },
         { number: '304', name: 'Гидропоника', floor: 3, description: 'Выращивание растений без почвы' }
     ],
-    
-    // Художественно-эстетическое направление
     'art': [
-        { number: '400','401', name: 'Хореографический зал', floor: 4, description: 'Зеркальный зал для танцев' },
+        { number: '401', name: 'Хореографический зал', floor: 4, description: 'Зеркальный зал для танцев' },
         { number: '402', name: 'Театральная студия', floor: 4, description: 'Сцена и театральное оборудование' },
         { number: '403', name: 'Изостудия', floor: 4, description: 'Мольберты и материалы для рисования' },
         { number: '404', name: 'Музыкальный класс', floor: 4, description: 'Фортепиано и музыкальные инструменты' },
         { number: '405', name: 'Фотостудия', floor: 4, description: 'Профессиональное фотооборудование' }
     ],
-    
-    // Администрация и общие помещения
     'admin': [
         { number: '001', name: 'Приемная директора', floor: 1, description: 'Кабинет администрации' },
         { number: '002', name: 'Методический кабинет', floor: 1, description: 'Консультации для родителей' },
@@ -59,28 +53,49 @@ const classrooms = {
     ]
 };
 
-/* ====== Функция поиска кабинета ====== */
+/* ====== Функция определения этажа по номеру кабинета ====== */
+function getFloorByNumber(number) {
+    const num = parseInt(number, 10);
+    if (isNaN(num)) return null;
+
+    if (num >= 1 && num <= 200) return 1;   // Администрация и IT 1 этаж
+    if (num >= 201 && num <= 300) return 2; // IT 2 этаж
+    if (num >= 301 && num <= 400) return 3; // Научные лаборатории 3 этаж
+    if (num >= 401 && num <= 405) return 4; // Художественные студии 4 этаж
+
+    return null; // вне диапазона
+}
+
+/* ====== Функция поиска кабинета с поддержкой этажей 1-405 ====== */
 function findClassroom(query) {
-    const normalizedQuery = query.toLowerCase().replace(/[^a-zа-яәғқңөүһі0-9]/gi, ' ').trim();
-    
-    // Поиск по номеру кабинета
+    const normalizedQuery = query.toLowerCase().replace(/[^a-zа-яәғқңөүһі0-9]+/gi, ' ').trim();
+
+    // Поиск по номеру кабинета в базе
     for (const category in classrooms) {
-        const room = classrooms[category].find(r => 
-            r.number === normalizedQuery || 
-            normalizedQuery.includes(r.number)
+        const room = classrooms[category].find(r =>
+            r.number === normalizedQuery || normalizedQuery.split(' ').includes(r.number)
         );
         if (room) return room;
     }
-    
+
+    // Если номер кабинета указан, но его нет в базе
+    const match = normalizedQuery.match(/\b\d{1,3}\b/);
+    if (match) {
+        const floor = getFloorByNumber(match[0]);
+        if (floor) {
+            return { number: match[0], floor: floor, description: `Кабинет ${match[0]} находится на ${floor}-м этаже.` };
+        }
+    }
+
     // Поиск по названию
     for (const category in classrooms) {
-        const room = classrooms[category].find(r => 
+        const room = classrooms[category].find(r =>
             normalizedQuery.includes(r.name.toLowerCase()) ||
             r.name.toLowerCase().includes(normalizedQuery)
         );
         if (room) return room;
     }
-    
+
     // Поиск по направлению
     if (matchAny(normalizedQuery, ['it', 'айти', 'компьютер', 'программир'])) {
         return { category: 'it', description: 'IT-направление находится на 1-2 этажах' };
@@ -91,9 +106,10 @@ function findClassroom(query) {
     if (matchAny(normalizedQuery, ['искусств', 'творч', 'танц', 'театр', 'музык', 'рисован'])) {
         return { category: 'art', description: 'Творческие студии находятся на 4 этаже' };
     }
-    
+
     return null;
 }
+
 
 /* ====== Логика агента ====== */
 function agentResponse(input){
@@ -306,4 +322,5 @@ clearBtn.onclick = () => {
     historyEl.innerHTML = ''; 
     appendMessage('Привет! Я Джарвис — интерактивный помощник Дворца школьников Петропавловска. Я помогу найти любой кабинет и подскажу, как туда пройти! Чем могу помочь?', 'bot');
 };
+
 
