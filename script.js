@@ -15,7 +15,7 @@ function appendMessage(text, who='bot'){
 
 /* ====== Функция поиска ключевых слов ====== */
 function matchAny(str, keywords){
-    str = str.toLowerCase().replace(/[^a-zа-яәғқңөүһі0-9]/gi, ' ');
+    str = str.toLowerCase().replace(/[^a-zа-яәғқңөүһі0-9]+/gi, ' ').trim();
     return keywords.some(kw => str.includes(kw));
 }
 
@@ -57,24 +57,22 @@ function getFloorByNumber(number) {
     const num = parseInt(number, 10);
     if(isNaN(num)) return null;
 
-    if(num >= 1 && num <= 100) return 1;   // Администрация и IT 1 этаж
-    if(num >= 101 && num <= 200) return 1; // IT 1 этаж
+    if(num >= 1 && num <= 200) return 1;   // Администрация и IT 1 этаж
     if(num >= 201 && num <= 300) return 2; // IT 2 этаж
-    if(num >= 301 && num <= 400) return 3; // Научно-биологические 3 этаж
-    if(num >= 401 && num <= 500) return 4; // Художественно-эстетические 4 этаж
+    if(num >= 301 && num <= 400) return 3; // Научные лаборатории 3 этаж
+    if(num >= 401 && num <= 500) return 4; // Художественные студии 4 этаж
 
     return null;
 }
 
 /* ====== Функция поиска кабинета ====== */
 function findClassroom(query) {
-    const normalizedQuery = query.toLowerCase().replace(/[^a-zа-яәғқңөүһі0-9]/gi, ' ').trim();
+    const normalizedQuery = query.toLowerCase().replace(/[^a-zа-яәғқңөүһі0-9]+/gi, ' ').trim();
 
     // Поиск по номеру кабинета в базе
     for (const category in classrooms) {
         const room = classrooms[category].find(r =>
-            r.number === normalizedQuery ||
-            normalizedQuery.includes(r.number)
+            r.number === normalizedQuery || normalizedQuery.split(' ').includes(r.number)
         );
         if (room) return room;
     }
@@ -115,7 +113,7 @@ function agentResponse(input){
     const s = input.toLowerCase();
 
     // ===== Приветствия =====
-    if (/^(hello|hi|hey)/.test(s)) {
+    if (/\b(hello|hi|hey)\b/.test(s)) {
         const greetings = [
             "Hello! I am an interactive assistant at the Petropavlovsk Schoolchildren's Palace. How can I help?",
             "Good afternoon! Ask me about clubs, directions, classrooms or events."
@@ -123,7 +121,7 @@ function agentResponse(input){
         return greetings[Math.floor(Math.random() * greetings.length)];
     }
 
-    if (/^(салем|салеме|сәлем)/.test(s)) {
+    if (/\b(салем|салеме|сәлем)\b/.test(s)) {
         const greetings = [
             "Сәлеметсіздер ме! Мен Петропавл қалалық Оқушылар сарайының интерактивті көмекшісімін. Қалай көмектесе аламын?",
             "Қайырлы күн! Мен сізге Оқушылар сарайында жол көрсетемін. Клубтар, бөлмелер немесе оқиғалар туралы сұраңыз."
@@ -131,7 +129,7 @@ function agentResponse(input){
         return greetings[Math.floor(Math.random() * greetings.length)];
     }
 
-    if (/^(прив|здр)/.test(s)) {
+    if (/\b(прив|здр)\b/.test(s)) {
         const greetings = [
             "Здравствуйте! Я интерактивный помощник Дворца школьников Петропавловска. Чем могу помочь?",
             "Добрый день! Спросите меня о кружках, кабинетах, направлениях или мероприятиях."
@@ -160,7 +158,7 @@ function agentResponse(input){
     // ===== Этажи и планировка =====
     if (matchAny(s, ['этаж', 'қабат', 'floor', 'планировка', 'схема'])) {
         return "Планировка Дворца школьников:\n\n" +
-               "🔹 1 этаж: Администрация, IT (101–102)\n" +
+               "🔹 1 этаж: Администрация, IT (001–102)\n" +
                "🔹 2 этаж: IT, Веб-разработка (201–202)\n" +
                "🔹 3 этаж: Научные лаборатории (301–304)\n" +
                "🔹 4 этаж: Художественно-эстетические направления (401–405)";
