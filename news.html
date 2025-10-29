@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Новости - Digital Urpaq</title>
+    <link rel="stylesheet" href="style.css">
+    <style>
+        /* Анимации для новостей */
+        .news-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 30px;
+            margin: 40px 0;
+        }
+
+        .news-card {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: all 0.4s ease;
+            position: relative;
+            opacity: 0;
+            transform: translateY(30px);
+            animation: slideUp 0.6s ease forwards;
+        }
+
+        .news-card:nth-child(2) { animation-delay: 0.1s; }
+        .news-card:nth-child(3) { animation-delay: 0.2s; }
+        .news-card:nth-child(4) { animation-delay: 0.3s; }
+        .news-card:nth-child(5) { animation-delay: 0.4s; }
+        .news-card:nth-child(6) { animation-delay: 0.5s; }
+
+        @keyframes slideUp {
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .news-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.15);
+        }
+
+        .news-image {
+            width: 100%;
+            height: 200px;
+            background: linear-gradient(45deg, var(--primary-color), #003d82);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .news-image::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .news-card:hover .news-image::before {
+            left: 100%;
+        }
+
+        .news-content {
+            padding: 25px;
+        }
+
+        .news-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .news-date {
+            background: linear-gradient(135deg, var(--primary-color), #003d82);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .news-category {
+            background: var(--accent-color);
+            color: #333;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 0.8em;
+            font-weight: 600;
+        }
+
+        .news-title {
+            font-size: 1.3em;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #333;
+            line-height: 1.4;
+        }
+
+        .news-excerpt {
+            color: #666;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .read-more {
+            display: inline-flex;
+            align-items: center;
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .read-more::after {
+            content: '→';
+            margin-left: 8px;
+            transition: transform 0.3s ease;
+        }
+
+        .read-more:hover::after {
+            transform: translateX(5px);
+        }
+
+        .read-more:hover {
+            color: #003d82;
+        }
+
+        .featured-news {
+            grid-column: 1 / -1;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+
+        .featured-card {
+            background: linear-gradient(135deg, var(--primary-color), #003d82);
+            color: white;
+            border-radius: 20px;
+            padding: 40px;
+            position: relative;
+            overflow: hidden;
+            animation: pulseFeatured 3s ease-in-out infinite;
+        }
+
+        @keyframes pulseFeatured {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.02); }
+        }
+
+        .featured-card::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -50%;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: rotate 10s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .featured-badge {
+            background: var(--accent-color);
+            color: #333;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 20px;
+        }
+
+        .news-filters {
+            display: flex;
+            gap: 15px;
+            margin: 30px 0;
+            flex-wrap: wrap;
+        }
+
+        .filter-btn {
+            padding: 10px 20px;
+            border: 2px solid var(--primary-color);
+            background: white;
+            color: var(--primary-color);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .filter-btn.active,
+        .filter-btn:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 50px;
+        }
+
+        .page-btn {
+            width: 40px;
+            height: 40px;
+            border: 2px solid #e9ecef;
+            background: white;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+        }
+
+        .page-btn.active,
+        .page-btn:hover {
+            border-color: var(--primary-color);
+            background: var(--primary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .newsletter-section {
+            background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+            padding: 50px;
+            border-radius: 20px;
+            text-align: center;
+            margin: 50px 0;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .newsletter-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 1000"><polygon fill="%230056b3" fill-opacity="0.03" points="0,1000 1000,0 1000,1000"/></svg>');
+            animation: floatBackground 20s linear infinite;
+        }
+
+        @keyframes floatBackground {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(-100px); }
+        }
+
+        .newsletter-form {
+            max-width: 400px;
+            margin: 0 auto;
+            position: relative;
+            z-index: 1;
+        }
+
+        .newsletter-input {
+            width: 100%;
+            padding: 15px 20px;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            font-size: 16px;
+            transition: all 0.3s ease;
+        }
+
+        .newsletter-input:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(0,86,179,0.1);
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <div class="header-top">
+                <div class="logo">
+                    <div class="logo-text">
+                        <h1>Digital Urpaq</h1>
+                        <p>Дворец школьников города Петропавловска</p>
+                    </div>
+                </div>
+                <div class="header-contacts">
+                    <p>г. Петропавловск, ул. Жамбыла Жабаева, 55 А</p>
+                    <p>Телефон: 8 7152 34-02-44</p>
+                    <p>Email: info@digitalurpaq.edu.kz</p>
+                </div>
+            </div>
+            <nav>
+                <ul>
+                    <li><a href="index.html">Главная</a></li>
+                    <li><a href="about.html">О нас</a></li>
+                    <li><a href="directions.html">Направления</a></li>
+                    <li><a href="events.html">Мероприятия</a></li>
+                    <li><a href="news.html" class="active">Новости</a></li>
+                    <li><a href="contacts.html">Контакты</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <div class="container">
+            <div class="hero-content">
+                <h2>Новости и события</h2>
+                <p>Будьте в курсе последних событий Дворца школьников</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="container">
+        <div class="page-content">
+            <!-- Фильтры -->
+            <div class="news-filters">
+                <button class="filter-btn active" data-filter="all">Все новости</button>
+                <button class="filter-btn" data-filter="it">IT-технологии</button>
+                <button class="filter-btn" data-filter="science">Наука</button>
+                <button class="filter-btn" data-filter="art">Искусство</button>
+                <button class="filter-btn" data-filter="events">Мероприятия</button>
+                <button class="filter-btn" data-filter="achievements">Достижения</button>
+            </div>
+
+            <!-- Главная новость -->
+            <div class="featured-news">
+                <div class="featured-card">
+                    <span class="featured-badge">Главная новость</span>
+                    <h2 style="color: white; margin-bottom: 15px;">Открытие новой IT-лаборатории</h2>
+                    <p style="color: rgba(255,255,255,0.9); margin-bottom: 20px;">Современное оборудование для изучения программирования, робототехники и искусственного интеллекта</p>
+                    <span class="news-date">15 мая 2024</span>
+                </div>
+                <div class="featured-card" style="background: linear-gradient(135deg, #ffc107, #ffd54f);">
+                    <span class="featured-badge" style="background: var(--primary-color); color: white;">Набор открыт</span>
+                    <h2 style="color: #333; margin-bottom: 15px;">Летние образовательные программы</h2>
+                    <p style="color: #666; margin-bottom: 20px;">Интенсивные курсы по программированию, дизайну и научным исследованиям для школьников</p>
+                    <span class="news-date" style="background: var(--primary-color);">1 июня 2024</span>
+                </div>
+            </div>
+
+            <!-- Сетка новостей -->
+            <div class="news-grid">
+                <!-- Новость 1 -->
+                <div class="news-card" data-category="it">
+                    <div class="news-image" style="background: linear-gradient(45deg, #0056b3, #003d82);"></div>
+                    <div class="news-content">
+                        <div class="news-meta">
+                            <span class="news-date">12 мая 2024</span>
+                            <span class="news-category">IT-технологии</span>
+                        </div>
+                        <h3 class="news-title">Победа в республиканском хакатоне</h3>
+                        <p class="news-excerpt">Команда наших программистов заняла первое место в конкурсе мобильных приложений...</p>
+                        <a href="#" class="read-more">Читать далее</a>
+                    </div>
+                </div>
+
+                <!-- Новость 2 -->
+                <div class="news-card" data-category="science">
+                    <div class="news-image" style="background: linear-gradient(45deg, #28a745, #20c997);"></div>
+                    <div class="news-content">
+                        <div class="news-meta">
+                            <span class="news-date">8 мая 2024</span>
+                            <span class="news-category">Наука</span>
+                        </div>
+                        <h3 class="news-title">Научные проекты школьников</h3>
+                        <p class="news-excerpt">Ученики представили исследовательские работы на городской конференции...</p>
+                        <a href="#" class="read-more">Читать далее</a>
+                    </div>
+                </div>
+
+                <!-- Новость 3 -->
+                <div class="news-card" data-category="art">
+                    <div class="news-image" style="background: linear-gradient(45deg, #e83e8c, #6f42c1);"></div>
+                    <div class="news-content">
+                        <div class="news-meta">
+                            <span class="news-date">5 мая 2024</span>
+                            <span class="news-category">Искусство</span>
+                        </div>
+                        <h3 class="news-title">Театральный фестиваль завершен</h3>
+                        <p class="news-excerpt">Воспитанники театральной студии представили спектакль "Волшебник Изумрудного города"...</p>
+                        <a href="#" class="read-more">Читать далее</a>
+                    </div>
+                </div>
+
+                <!-- Новость 4 -->
+                <div class="news-card" data-category="events">
+                    <div class="news-image" style="background: linear-gradient(45deg, #fd7e14, #e6492d);"></div>
+                    <div class="news-content">
+                        <div class="news-meta">
+                            <span class="news-date">2 мая 2024</span>
+                            <span class="news-category">Мероприятия</span>
+                        </div>
+                        <h3 class="news-title">День открытых дверей</h3>
+                        <p class="news-excerpt">Более 200 семей посетили Дворец школьников в рамках дня открытых дверей...</p>
+                        <a href="#" class="read-more">Читать далее</a>
+                    </div>
+                </div>
+
+                <!-- Новость 5 -->
+                <div class="news-card" data-category="achievements">
+                    <div class="news-image" style="background: linear-gradient(45deg, #6f42c1, #e83e8c);"></div>
+                    <div class="news-content">
+                        <div class="news-meta">
+                            <span class="news-date">28 апреля 2024</span>
+                            <span class="news-category">Достижения</span>
+                        </div>
+                        <h3 class="news-title">Стипендии одаренным детям</h3>
+                        <p class="news-excerpt">20 воспитанников Дворца школьников получили именные стипендии...</p>
+                        <a href="#" class="read-more">Читать далее</a>
+                    </div>
+                </div>
+
+                <!-- Новость 6 -->
+                <div class="news-card" data-category="it">
+                    <div class="news-image" style="background: linear-gradient(45deg, #20c997, #28a745);"></div>
+                    <div class="news-content">
+                        <div class="news-meta">
+                            <span class="news-date">25 апреля 2024</span>
+                            <span class="news-category">IT-технологии</span>
+                        </div>
+                        <h3 class="news-title">Мастер-класс по 3D-моделированию</h3>
+                        <p class="news-excerpt">Приглашенный эксперт провел мастер-класс по созданию 3D-моделей...</p>
+                        <a href="#" class="read-more">Читать далее</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Пагинация -->
+            <div class="pagination">
+                <button class="page-btn active">1</button>
+                <button class="page-btn">2</button>
+                <button class="page-btn">3</button>
+                <button class="page-btn">→</button>
+            </div>
+
+            <!-- Рассылка -->
+            <div class="newsletter-section">
+                <h2>Подпишитесь на рассылку</h2>
+                <p>Будьте в курсе последних новостей и мероприятий Дворца школьников</p>
+                <form class="newsletter-form">
+                    <input type="email" class="newsletter-input" placeholder="Ваш email" required>
+                    <button type="submit" class="submit-btn" style="margin-top: 15px;">Подписаться</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-column">
+                    <h3>Новости</h3>
+                    <ul>
+                        <li><a href="news.html">Все новости</a></li>
+                        <li><a href="news.html#it">IT-технологии</a></li>
+                        <li><a href="news.html#science">Наука</a></li>
+                        <li><a href="news.html#art">Искусство</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Быстрые ссылки</h3>
+                    <ul>
+                        <li><a href="events.html">Мероприятия</a></li>
+                        <li><a href="directions.html">Кружки</a></li>
+                        <li><a href="about.html">О нас</a></li>
+                        <li><a href="contacts.html">Контакты</a></li>
+                    </ul>
+                </div>
+                
+                <div class="footer-column">
+                    <h3>Контакты</h3>
+                    <ul>
+                        <li>г. Петропавловск, ул. Жамбыла Жабаева, 55 А</li>
+                        <li>Телефон: 8 7152 34-02-44</li>
+                        <li>Email: info@digitalurpaq.edu.kz</li>
+                        <li>Режим работы: Пн-Сб 9:00-18:00</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="copyright">
+                &copy; 2023 Digital Urpaq - Дворец школьников города Петропавловска. Все права защищены.
+            </div>
+        </div>
+    </footer>
+
+    <script>
+        // Фильтрация новостей
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                // Убираем активный класс у всех кнопок
+                document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+                // Добавляем активный класс текущей кнопке
+                this.classList.add('active');
+                
+                const filter = this.dataset.filter;
+                const newsCards = document.querySelectorAll('.news-card');
+                
+                newsCards.forEach(card => {
+                    if (filter === 'all' || card.dataset.category === filter) {
+                        card.style.display = 'block';
+                        card.style.animation = 'slideUp 0.6s ease forwards';
+                    } else {
+                        card.style.display = 'none';
+                    }
+                });
+            });
+        });
+
+        // Пагинация
+        document.querySelectorAll('.page-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                if (this.textContent === '→') {
+                    // Логика для следующей страницы
+                    alert('Переход на следующую страницу');
+                    return;
+                }
+                
+                document.querySelectorAll('.page-btn').forEach(b => b.classList.remove('active'));
+                this.classList.add('active');
+            });
+        });
+
+        // Рассылка
+        document.querySelector('.newsletter-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const email = this.querySelector('.newsletter-input').value;
+            alert(`Спасибо за подписку! На адрес ${email} будут приходить наши новости.`);
+            this.reset();
+        });
+    </script>
+</body>
+</html>
